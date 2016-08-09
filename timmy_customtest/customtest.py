@@ -15,21 +15,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import logging
-import sys
-from timmy import nodes
-from timmy.conf import load_conf
-from timmy.tools import interrupt_wrapper
-import urllib2
-import hashlib
-import csv
-import sqlite3
-import re
-import os
-import yaml
 import argparse
-from vercmp import vercmp
+import csv
+import hashlib
+import logging
+import os
+import re
+import sqlite3
+import sys
+import urllib2
+import yaml
+
+from timmy_customtest import configuration
+from timmy_customtest import nodes
+from timmy_customtest.utils import interrupt_wrapper
+from timmy_customtest.vercmp import vercmp
 
 
 class Unbuffered(object):
@@ -479,7 +479,7 @@ def main(argv=None):
         args.config = './timmy-config.yaml'
     print('Initialization:')
     sys.stdout.write('  Getting node list: ')
-    conf = load_conf(args.config)
+    conf = configuration.load_conf(args.config)
     nm = node_manager_init(conf)
     print('DONE')
     sys.stdout.write('  Loading necessary databases: ')

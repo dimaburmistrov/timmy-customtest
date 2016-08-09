@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from setuptools import setup
 import os
+from setuptools import setup
 
 d = os.path.join(os.path.abspath(os.sep), 'usr', 'share', 'timmy-customtest')
 d_files = [(os.path.join(d, root), [os.path.join(root, f) for f in files])
@@ -15,10 +15,10 @@ setup(name='timmy-customtest',
       author='Dmitry Sutyagin',
       author_email='f3flight@gmail.com',
       license='Apache2',
-      url='https://github.com/f3flight/timmy-customtest',
+      url='https://github.com/toha10/timmy-customtest',
       long_description=open('README.md').read(),
       packages=["timmy_customtest"],
-      install_requires=['timmy'],
+      install_requires=['pyyaml'],
       data_files=d_files,
       include_package_data=True,
       entry_points={'console_scripts':
