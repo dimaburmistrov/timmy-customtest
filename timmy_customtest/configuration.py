@@ -12,71 +12,67 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import os
-import tempfile
+import pkg_resources
 
 from timmy_customtest import utils
 
+_CONFIG = None
+DEFAULT_CONFIG_FILE = 'default_config.yaml'
 
-def load_conf(filename):
-    """Prepares global configuration.
 
-    Update default settings with loaded from configuration file.
+class CustomtestConfig(object):
+    """Represents configuration of Timmy-Customtest
+
+    Initializes default configuration and updates it by user config file
+    if it's provided.
     """
-    conf = {}
-    conf['hard_filter'] = {}
-    conf['soft_filter'] = {'status': ['ready', 'discover'], 'online': True}
-    conf['ssh_opts'] = ['-oConnectTimeout=2', '-oStrictHostKeyChecking=no',
-                        '-oUserKnownHostsFile=/dev/null', '-oLogLevel=error',
-                        '-lroot', '-oBatchMode=yes']
-    conf['env_vars'] = ['OPENRC=/root/openrc', 'IPTABLES_STR="iptables -nvL"']
-    conf['fuel_ip'] = '127.0.0.1'
-    conf['fuel_user'] = 'admin'
-    conf['fuel_pass'] = 'admin'
-    conf['fuel_tenant'] = 'admin'
-    conf['fuelclient'] = True  # use fuelclient library by default
-    conf['fuel_skip_proxy'] = True
-    conf['timeout'] = 15
-    conf['prefix'] = 'nice -n 19 ionice -c 3'
-    rqdir = 'rq'
-    rqfile = 'rq.yaml'
-    dtm = os.path.join(os.path.abspath(os.sep), 'usr', 'share', 'timmy-customtest')
-    if os.path.isdir(os.path.join(dtm, rqdir)):
-        conf['rqdir'] = os.path.join(dtm, rqdir)
-    else:
-        conf['rqdir'] = rqdir
-    if os.path.isfile(os.path.join(dtm, rqfile)):
-        conf['rqfile'] = os.path.join(dtm, rqfile)
-    else:
-        conf['rqfile'] = rqfile
-    conf['compress_timeout'] = 3600
-    conf['outdir'] = os.path.join(tempfile.gettempdir(), 'timmy-customtest', 'info')
-    conf['archive_dir'] = os.path.join(tempfile.gettempdir(), 'timmy-customtest', 'archives')
-    conf['archive_name'] = 'general.tar.gz'
-    conf['outputs_timestamp'] = False
-    conf['dir_timestamp'] = False
-    conf['put'] = []
-    conf['cmds'] = []
-    conf['scripts'] = []
-    conf['files'] = []
-    conf['filelists'] = []
-    conf['logs'] = {'path': '/var/log',
-                    'exclude': '\.[^12]\.gz$|\.\d{2,}\.gz$',
-                    'start': '30'}
-    '''Shell mode - only run what was specified via command line.
-    Skip actionable conf fields (see timmy-customtest/nodes.py -> Node.conf_actionable);
-    Skip rqfile import;
-    Skip any overrides (see Node.conf_match_prefix);
-    Skip 'once' overrides (see Node.conf_once_prefix);
-    Skip Fuel node;
-    Print command execution results. Files and outputs will also be in a
-    place specified by conf['outdir'], archive will also be created and put
-    in a place specified by conf['archive_dir'].'''
-    conf['shell_mode'] = False
-    '''Print output of commands and scripts to stdout'''
-    conf['do_print_results'] = False
-    '''Clean - erase previous results in outdir and archive_dir dir, if any.'''
-    conf['clean'] = True
-    conf_extra = utils.load_yaml_file(filename)
-    conf.update(**conf_extra)
-    return conf
+
+    def __init__(self, config_file=None):
+        self.config = {}
+        self._init_default_config()
+
+        if config_file is not None:
+            self._update_config(config_file)
+
+    def _init_default_config(self):
+        default_config_file = pkg_resources.resource_filename(
+            'timmy_customtest',
+            DEFAULT_CONFIG_FILE)
+        self.config = utils.load_yaml_file(default_config_file)
+
+    def _update_config(self, config_file):
+        additional_config = utils.load_yaml_file(config_file)
+        self.config.update(additional_config)
+
+    def __getattr__(self, option):
+        if option in self.config:
+            return self.config[option]
+
+        raise AttributeError('Option with name {0} is not configured'
+                             'in config or is not supported'.format(option))
+
+    def __getitem__(self, item):
+        return self.config[item]
+
+    def __setitem__(self, item, value):
+        self.config[item] = value
+
+    def __contains__(self, item):
+        return item in self.config
+
+    def __iter__(self):
+        return iter(self.config)
+
+    def __repr__(self):
+        return '<customtest config object>'
+
+
+def _init_config(config_file=None):
+    global _CONFIG
+    _CONFIG = CustomtestConfig(config_file)
+
+
+def get_config(config_file=None):
+    if _CONFIG is None:
+        _init_config(config_file)
+    return _CONFIG
