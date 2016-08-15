@@ -6,6 +6,7 @@ rqfile: '/usr/share/timmy-customtest/rq.yaml'
 customtest_db_dir: '/usr/share/timmy-customtest/db'
 outdir: '/tmp/timmy-customtest/info'
 hard_filter:
+    no_roles: ['fuel']
     status: ['ready']
     online: True
     # you can filter by roles

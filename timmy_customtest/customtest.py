@@ -199,17 +199,18 @@ def node_manager_init(conf):
 
 def output_add(output, node, message, key=None):
     if node.cluster == 0:
-        if 'fuel' not in output:
-            if key:
-                output['fuel'] = {}
-            else:
-                output['fuel'] = []
-        if key:
-            if key not in output['fuel']:
-                output['fuel'][key] = []
-            output['fuel'][key].append(message)
-        else:
-            output['fuel'].append(message)
+        pass
+        # if 'fuel' not in output:
+        #     if key:
+        #         output['fuel'] = {}
+        #     else:
+        #         output['fuel'] = []
+        # if key:
+        #     if key not in output['fuel']:
+        #         output['fuel'][key] = []
+        #     output['fuel'][key].append(message)
+        # else:
+        #     output['fuel'].append(message)
     else:
         if node.cluster not in output:
             output[node.cluster] = {}
