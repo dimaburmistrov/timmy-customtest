@@ -433,12 +433,9 @@ class NodeManager(object):
                         online=True,
                         ip=self.conf['fuel_ip'],
                         conf=self.conf)
-        # # soft-skip Fuel if it is hard-filtered
-        # if not self.filter(fuelnode, self.conf['hard_filter']):
-        #     fuelnode.filtered_out = True
-
-        # disabling master node info fetching
-        fuelnode.filtered_out = True
+        # soft-skip Fuel if it is hard-filtered
+        if not self.filter(fuelnode, self.conf['hard_filter']):
+            fuelnode.filtered_out = True
         self.nodes[self.conf['fuel_ip']] = fuelnode
 
     def get_nodes_fuelclient(self):
