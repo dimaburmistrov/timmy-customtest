@@ -6,7 +6,7 @@ from setuptools import setup
 d = os.path.join(os.path.abspath(os.sep), 'usr', 'share', 'timmy-customtest')
 d_files = [(os.path.join(d, root), [os.path.join(root, f) for f in files])
            for root, dirs, files in os.walk('rq')]
-d_files.append((os.path.join(d), ['timmy-config-default.yaml', 'rq.yaml']))
+d_files.append((os.path.join(d), ['rq.yaml']))
 d_files += [(os.path.join(d, root), [os.path.join(root, f) for f in files])
             for root, dirs, files in os.walk('db')]
 

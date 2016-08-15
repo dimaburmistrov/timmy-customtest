@@ -274,40 +274,38 @@ class NodeManager(object):
     def __init__(self, conf, extended=False, nodes_json=None, logger=None):
         self.conf = conf
         self.logger = logger or logging.getLogger(__name__)
-        if conf['outputs_timestamp'] or conf['dir_timestamp']:
+        if conf.outputs_timestamp or conf.dir_timestamp:
             timestamp_str = datetime.datetime.now().strftime('_%F_%H-%M-%S')
-            if conf['outputs_timestamp']:
-                conf['outputs_timestamp_str'] = timestamp_str
-            if conf['dir_timestamp']:
-                conf['outdir'] += timestamp_str
-                conf['archive_dir'] += timestamp_str
-        if conf['clean']:
-            shutil.rmtree(conf['outdir'], ignore_errors=True)
-            shutil.rmtree(conf['archive_dir'], ignore_errors=True)
-        if not conf['shell_mode']:
-            self.rqdir = conf['rqdir']
+            if conf.outputs_timestamp:
+                conf.outputs_timestamp_str = timestamp_str
+            if conf.dir_timestamp:
+                conf.outdir += timestamp_str
+        if conf.clean:
+            shutil.rmtree(conf.outdir, ignore_errors=True)
+        if not conf.shell_mode:
+            self.rqdir = conf.rqdir
             if (not os.path.exists(self.rqdir)):
                 self.logger.critical(('NodeManager: directory %s does not'
                                       ' exist') % self.rqdir)
                 sys.exit(1)
-            if self.conf['rqfile']:
+            if self.conf.rqfile:
                 self.import_rq()
         self.nodes = {}
         self.fuel_init()
         # save os environment variables
         environ = os.environ
-        if FuelClient and conf['fuelclient']:
+        if FuelClient and conf.fuelclient:
             try:
-                if self.conf['fuel_skip_proxy']:
+                if self.conf.fuel_skip_proxy:
                     os.environ['HTTPS_PROXY'] = ''
                     os.environ['HTTP_PROXY'] = ''
                     os.environ['https_proxy'] = ''
                     os.environ['http_proxy'] = ''
                 self.logger.info('Setup fuelclient instance')
                 self.fuelclient = FuelClient()
-                self.fuelclient.username = self.conf['fuel_user']
-                self.fuelclient.password = self.conf['fuel_pass']
-                self.fuelclient.tenant_name = self.conf['fuel_tenant']
+                self.fuelclient.username = self.conf.fuel_user
+                self.fuelclient.password = self.conf.fuel_pass
+                self.fuelclient.tenant_name = self.conf.fuel_tenant
                 # self.fuelclient.debug_mode(True)
             except Exception as e:
                 self.logger.info('Failed to setup fuelclient instance:%s' % e,
@@ -325,9 +323,9 @@ class NodeManager(object):
         self.nodes_init()
         # apply soft-filter on all nodes
         for node in self.nodes.values():
-            if not self.filter(node, self.conf['soft_filter']):
+            if not self.filter(node, self.conf.soft_filter):
                 node.filtered_out = True
-        if not conf['shell_mode']:
+        if not conf.shell_mode:
             if not self.get_release_fuel_client():
                 self.get_release_cli()
             self.nodes_reapply_conf()
@@ -352,7 +350,7 @@ class NodeManager(object):
         header = Node.header
         nodestrings = [header]
         for n in self.sorted_nodes():
-            if self.filter(n, self.conf['hard_filter']):
+            if self.filter(n, self.conf.hard_filter):
                 nodestrings.append(n.print_table())
         colwidth = []
         for i in range(len(header)):
@@ -362,7 +360,7 @@ class NodeManager(object):
             pt += '{%s:<%s}' % (i, str(colwidth[i]))
         nodestrings = [(pt.format(*header))]
         for n in self.sorted_nodes():
-            if self.filter(n, self.conf['hard_filter']):
+            if self.filter(n, self.conf.hard_filter):
                 n.pt = pt
                 nodestrings.append(str(n))
         return '\n'.join(nodestrings)
@@ -411,7 +409,7 @@ class NodeManager(object):
                 dst[k][attr] = el[k]
 
         dst = self.conf
-        src = utils.load_yaml_file(self.conf['rqfile'])
+        src = utils.load_yaml_file(self.conf.rqfile)
         p = Node.conf_match_prefix
         once_p = Node.conf_once_prefix + p
         d = Node.conf_default_key
@@ -419,7 +417,7 @@ class NodeManager(object):
             r_sub(attr, src, attr, d, p, once_p, dst)
 
     def fuel_init(self):
-        if not self.conf['fuel_ip']:
+        if not self.conf.fuel_ip:
             self.logger.critical('NodeManager: fuel_ip not set')
             sys.exit(7)
         fuelnode = Node(id=0,
@@ -431,12 +429,12 @@ class NodeManager(object):
                         roles=['fuel'],
                         status='ready',
                         online=True,
-                        ip=self.conf['fuel_ip'],
+                        ip=self.conf.fuel_ip,
                         conf=self.conf)
         # soft-skip Fuel if it is hard-filtered
-        if not self.filter(fuelnode, self.conf['hard_filter']):
+        if not self.filter(fuelnode, self.conf.hard_filter):
             fuelnode.filtered_out = True
-        self.nodes[self.conf['fuel_ip']] = fuelnode
+        self.nodes[self.conf.fuel_ip] = fuelnode
 
     def get_nodes_fuelclient(self):
         if not self.fuelclient:
@@ -465,7 +463,7 @@ class NodeManager(object):
             self.logger.warning(("Can't get fuel version or "
                                  "clusters information"))
             return False
-        self.nodes[self.conf['fuel_ip']].release = fuel_version
+        self.nodes[self.conf.fuel_ip].release = fuel_version
         cldict = {}
         for cluster in clusters:
             cldict[cluster['id']] = cluster
@@ -483,10 +481,10 @@ class NodeManager(object):
 
     def get_nodes_cli(self):
         self.logger.info('use CLI for getting node information')
-        fuelnode = self.nodes[self.conf['fuel_ip']]
+        fuelnode = self.nodes[self.conf.fuel_ip]
         fuel_node_cmd = ('fuel node list --json --user %s --password %s' %
-                         (self.conf['fuel_user'],
-                          self.conf['fuel_pass']))
+                         (self.conf.fuel_user,
+                          self.conf.fuel_pass))
         nodes_json, err, code = utils.ssh_node(ip=fuelnode.ip,
                                                command=fuel_node_cmd,
                                                ssh_opts=fuelnode.ssh_opts,
@@ -560,7 +558,7 @@ class NodeManager(object):
     def filter(self, node, node_filter):
         f = node_filter
         # soft-skip Fuel node for shell mode
-        if node.id == 0 and self.conf['shell_mode']:
+        if node.id == 0 and self.conf.shell_mode:
             return False
         else:
             elems = []

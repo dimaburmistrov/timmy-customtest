@@ -1,0 +1,75 @@
+# Fuel client options
+fuelclient: True
+fuel_skip_proxy: True
+fuel_ip: '127.0.0.1'
+fuel_user: 'admin'
+fuel_pass: 'admin'
+fuel_tenant: 'admin'
+
+# RQ
+rqdir: '/usr/share/timmy-customtest/rq'
+rqfile: '/usr/share/timmy-customtest/rq.yaml'
+
+# Paths
+customtest_db_dir: '/usr/share/timmy-customtest/db'
+outdir: '/tmp/timmy-customtest/info'
+outputs_timestamp: False
+dir_timestamp: False
+
+put: []
+cmds: []
+scripts: []
+files: []
+filelists: []
+logs:
+    path: '/var/log'
+    exclude: '\.[^12]\.gz$|\.\d{2,}\.gz$'
+    start: '30'
+
+# Filtering
+hard_filter:
+    status:
+        - 'ready'
+    online: True
+    # you can filter by roles
+    roles: []
+    # you can filter by node ids
+    id: []
+    # you can filter by env ids
+    cluster: []
+soft_filter:
+    status:
+        - 'ready'
+        - 'discover'
+    online: True
+
+# Prefix for execution commands on nodes
+prefix: 'nice -n 19 ionice -c 3'
+
+ssh_opts:
+    - '-oConnectTimeout=2'
+    - '-oStrictHostKeyChecking=no'
+    - '-oUserKnownHostsFile=/dev/null'
+    - '-oLogLevel=error'
+    - '-lroot'
+    - '-oBatchMode=yes'
+
+env_vars:
+    - 'OPENRC=/root/openrc'
+    - 'IPTABLES_STR="iptables -nvL"'
+
+# Shell mode - only run what was specified via command line.
+# Skip actionable conf fields (see timmy-customtest/nodes.py -> Node.conf_actionable);
+# Skip rqfile import;
+# Skip any overrides (see Node.conf_match_prefix);
+# Skip 'once' overrides (see Node.conf_once_prefix);
+# Skip Fuel node;
+# Print command execution results. Outputs will be in a
+# place specified by conf['outdir']
+shell_mode: False
+
+# timeout is seconds for data collection (per command) - increase if needed
+timeout: 600
+
+# Clean - erase previous results in outdir and archive_dir dir, if any.
+clean: False

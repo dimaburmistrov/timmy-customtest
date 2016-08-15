@@ -463,23 +463,17 @@ def main(argv=None):
     sys.stdout = Unbuffered(sys.stdout)
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--fake',
-                        help=("Do not perform remote commands, use already "
-                              "collected data"),
-                        action="store_true")
+                        help=('Do not perform remote commands, use already '
+                              'collected data'),
+                        action='store_true')
     parser.add_argument('-c', '--config',
-                        help=('Config file to use to override default '
-                              'configuration. Default: /usr/share/'
-                              'timmy-customtest/timmy-config-default.yaml '
-                              '(if present, else ./timmy-config.yaml)'),
-                        default=('/usr/share/timmy-customtest/'
-                                 'timmy-config-default.yaml'))
+                        help='Path to user config file',
+                        default=None)
     if argv is None:
         argv = sys.argv
     args = parser.parse_args(argv[1:])
-    if not os.path.isfile(args.config):
-        args.config = './timmy-config.yaml'
     try:
-        conf = configuration.load_conf(args.config)
+        conf = configuration.get_config(args.config)
         nm = node_manager_init(conf)
     except Exception as e:
         print("[ERROR] Could't get node list.")
