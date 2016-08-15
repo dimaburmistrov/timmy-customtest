@@ -26,10 +26,12 @@ import sys
 import urllib2
 import yaml
 
+from collections import defaultdict
 from timmy_customtest import configuration
 from timmy_customtest import nodes
 from timmy_customtest.utils import interrupt_wrapper
 from timmy_customtest.vercmp import vercmp
+from timmy_customtest.utils import ssh_node
 
 
 class Unbuffered(object):
@@ -502,8 +504,34 @@ def main(argv=None):
             verify_md5_builtin_show_results, nm, {'conf': conf}, 'OK')
     perform('  MU safety analysis', mu_safety_check, nm,
             {'versions_dict': versions_dict}, 'OK')
-    perform('  Potential updates', update_candidates, nm,
-            {'versions_dict': versions_dict}, 'ALL NODES UP-TO-DATE')
+
+    # check updates state
+    print('Updates availability status [ installed / available ]:')
+    for _node in nm.nodes.values():
+        if _node.cluster == 0:
+            cluster_release = _node.release
+    try:
+        mu_latest_url = 'http://mirror.fuel-infra.org/mcv/mos/%s/mu-version.json' % cluster_release
+        mu_latest = yaml.load(urllib2.urlopen(url).read())['id']
+    except:
+        mu_latest = 'N/A'
+
+    _c = 'if [ -f /etc/fuel/mu-version.json ]; then grep -w id /etc/fuel/mu-version.json | grep -o "[0-9]*"; else echo 0; fi'
+    _res = defaultdict(dict)
+
+    for _node in nm.nodes.values():
+        if _node.cluster != 0:
+            _hostname = _node.fqdn.split('.')[0]
+            o, e, rc = ssh_node(ip=_node.ip, command=_c, ssh_opts=_node.ssh_opts, env_vars='', timeout=_node.timeout, prefix='')
+            if rc:
+                _res[_node.cluster][_hostname] = '%s: [ %s / %s ]' % (_hostname, 'ERROR', mu_latest)
+            else:
+                _res[_node.cluster][_hostname] = '%s: [ %s.%s / %s ]' % (_hostname, _node.release.split('.')[0], o.strip(), mu_latest)
+    for _env, _ in _res.iteritems():
+        print('  env: %s' % _env)
+        for _hostinfo in _.itervalues():
+            print '    ' + _hostinfo
+
     return 0
 
 
