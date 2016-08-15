@@ -478,22 +478,21 @@ def main(argv=None):
     args = parser.parse_args(argv[1:])
     if not os.path.isfile(args.config):
         args.config = './timmy-config.yaml'
-    print('Initialization:')
-    sys.stdout.write('  Getting node list: ')
-    conf = configuration.load_conf(args.config)
-    nm = node_manager_init(conf)
-    print('DONE')
-    sys.stdout.write('  Loading necessary databases: ')
+    try:
+        conf = configuration.load_conf(args.config)
+        nm = node_manager_init(conf)
+    except Exception as e:
+        print("[ERROR] Could't get node list.")
+        raise e
+
     versions_dict, output = load_versions_dict(conf, nm)
     if not versions_dict:
-        print('Aborting.')
+        print("[ERROR] Could't load databases.")
         return 1
-    if not output:
-        print('DONE')
-    else:
+    if output:
         pretty_print(output)
-    print('Data collection:')
-    sys.stdout.write('  Collecting data from %d nodes: ' % len(nm.nodes))
+
+    sys.stdout.write('Collecting data from %d nodes: ' % len(nm.nodes))
     nm.run_commands(conf['outdir'], fake=args.fake)
     print('DONE')
     print('Results:')
@@ -501,8 +500,6 @@ def main(argv=None):
             {'versions_dict': versions_dict}, 'OK')
     perform('  Built-in md5 verification analysis',
             verify_md5_builtin_show_results, nm, {'conf': conf}, 'OK')
-    perform('  MU safety analysis', mu_safety_check, nm,
-            {'versions_dict': versions_dict}, 'OK')
     perform('  Potential updates', update_candidates, nm,
             {'versions_dict': versions_dict}, 'ALL NODES UP-TO-DATE')
     return 0
