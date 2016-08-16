@@ -7,12 +7,12 @@ fuel_pass: 'admin'
 fuel_tenant: 'admin'
 
 # RQ
-rqdir: '/usr/share/timmy-customtest/rq'
-rqfile: '/usr/share/timmy-customtest/rq.yaml'
+rqdir: '/usr/share/cudet/rq'
+rqfile: '/usr/share/cudet/rq.yaml'
 
 # Paths
-customtest_db_dir: '/usr/share/timmy-customtest/db'
-outdir: '/tmp/timmy-customtest/info'
+cudet_db_dir: '/usr/share/cudet/db'
+outdir: '/tmp/cudet/info'
 outputs_timestamp: False
 dir_timestamp: False
 
@@ -59,7 +59,7 @@ env_vars:
     - 'IPTABLES_STR="iptables -nvL"'
 
 # Shell mode - only run what was specified via command line.
-# Skip actionable conf fields (see timmy-customtest/nodes.py -> Node.conf_actionable);
+# Skip actionable conf fields (see cudet/nodes.py -> Node.conf_actionable);
 # Skip rqfile import;
 # Skip any overrides (see Node.conf_match_prefix);
 # Skip 'once' overrides (see Node.conf_once_prefix);

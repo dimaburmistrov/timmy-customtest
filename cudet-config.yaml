@@ -3,8 +3,8 @@
 # fuel_ip: '127.0.0.1'
 rqdir: './rq'
 rqfile: './rq.yaml'
-customtest_db_dir: './db'
-outdir: '/tmp/timmy-customtest/info'
+cudet_db_dir: './db'
+outdir: '/tmp/cudet/info'
 hard_filter:
     no_roles: ['fuel']
     status: ['ready']

@@ -26,10 +26,10 @@ import sys
 import urllib2
 import yaml
 
-from timmy_customtest import configuration
-from timmy_customtest import nodes
-from timmy_customtest.utils import interrupt_wrapper
-from timmy_customtest.vercmp import vercmp
+from cudet import configuration
+from cudet import nodes
+from cudet.utils import interrupt_wrapper
+from cudet.vercmp import vercmp
 
 
 class Unbuffered(object):
@@ -74,7 +74,7 @@ def load_versions_dict(conf, nm):
                    'successfully downloaded from an online mirror.')
     msg_nodb_fail = ('no versions db found for MOS %s %s and could not '
                      'download from a mirror - this node will be skipped!')
-    db_dir = os.path.join(conf['customtest_db_dir'], 'versions')
+    db_dir = os.path.join(conf['cudet_db_dir'], 'versions')
     dbs = {}
     db_files = set()
     output = {}
@@ -308,7 +308,7 @@ def verify_md5_builtin_show_results(conf, node, output=None):
     if not os.path.exists(node.mapscr[command]):
         return output_add(output, node,
                           'builtin md5 data output file missing!')
-    ex_filename = os.path.join(conf['customtest_db_dir'],
+    ex_filename = os.path.join(conf['cudet_db_dir'],
                                'md5/%s/%s.filter' % (node.release,
                                                      node.os_platform))
     # value-less dict

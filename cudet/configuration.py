@@ -14,14 +14,14 @@
 
 import pkg_resources
 
-from timmy_customtest import utils
+from cudet import utils
 
 _CONFIG = None
 DEFAULT_CONFIG_FILE = 'default_config.yaml'
 
 
-class CustomtestConfig(object):
-    """Represents configuration of Timmy-Customtest
+class CudetConfig(object):
+    """Represents configuration of Cudet
 
     Initializes default configuration and updates it by user config file
     if it's provided.
@@ -36,7 +36,7 @@ class CustomtestConfig(object):
 
     def _init_default_config(self):
         default_config_file = pkg_resources.resource_filename(
-            'timmy_customtest',
+            'cudet',
             DEFAULT_CONFIG_FILE)
         self.config = utils.load_yaml_file(default_config_file)
 
@@ -64,12 +64,12 @@ class CustomtestConfig(object):
         return iter(self.config)
 
     def __repr__(self):
-        return '<customtest config object>'
+        return '<cudet config object>'
 
 
 def _init_config(config_file=None):
     global _CONFIG
-    _CONFIG = CustomtestConfig(config_file)
+    _CONFIG = CudetConfig(config_file)
 
 
 def get_config(config_file=None):

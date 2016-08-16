@@ -23,7 +23,7 @@ import tempfile
 import threading
 import yaml
 
-from timmy_customtest import flock
+from cudet import flock
 
 
 logger = logging.getLogger(__name__)
@@ -48,7 +48,7 @@ def interrupt_wrapper(f):
 
 def run_with_lock(f):
     def wrapper(*args, **kwargs):
-        lock = flock.FLock(os.path.join(tempfile.gettempdir(), 'timmy_%s.lock' % f.__name__))
+        lock = flock.FLock(os.path.join(tempfile.gettempdir(), 'cudet_%s.lock' % f.__name__))
         if not lock.lock():
             logger.warning('Unable to obtain lock, skipping "%s"' %
                            f.__name__)

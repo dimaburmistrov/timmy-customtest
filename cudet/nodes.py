@@ -31,7 +31,7 @@ try:
 except:
     pass
 
-from timmy_customtest import utils
+from cudet import utils
 
 
 class Node(object):
