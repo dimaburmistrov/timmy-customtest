@@ -1,11 +1,12 @@
 # fuel_user: 'admin'
 # fuel_pass: 'admin'
 # fuel_ip: '127.0.0.1'
-rqdir: '/usr/share/timmy-customtest/rq'
-rqfile: '/usr/share/timmy-customtest/rq.yaml'
-customtest_db_dir: '/usr/share/timmy-customtest/db'
-outdir: '/tmp/timmy-customtest/info'
+rqdir: './rq'
+rqfile: './rq.yaml'
+cudet_db_dir: './db'
+outdir: '/tmp/cudet/info'
 hard_filter:
+    no_roles: ['fuel']
     status: ['ready']
     online: True
     # you can filter by roles

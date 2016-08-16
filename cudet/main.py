@@ -27,11 +27,11 @@ import urllib2
 import yaml
 
 from collections import defaultdict
-from timmy_customtest import configuration
-from timmy_customtest import nodes
-from timmy_customtest.utils import interrupt_wrapper
-from timmy_customtest.vercmp import vercmp
-from timmy_customtest.utils import ssh_node
+from cudet import configuration
+from cudet import nodes
+from cudet.utils import interrupt_wrapper
+from cudet.vercmp import vercmp
+from cudet.utils import ssh_node
 
 
 class Unbuffered(object):
@@ -76,7 +76,7 @@ def load_versions_dict(conf, nm):
                    'successfully downloaded from an online mirror.')
     msg_nodb_fail = ('no versions db found for MOS %s %s and could not '
                      'download from a mirror - this node will be skipped!')
-    db_dir = os.path.join(conf['customtest_db_dir'], 'versions')
+    db_dir = os.path.join(conf['cudet_db_dir'], 'versions')
     dbs = {}
     db_files = set()
     output = {}
@@ -201,17 +201,18 @@ def node_manager_init(conf):
 
 def output_add(output, node, message, key=None):
     if node.cluster == 0:
-        if 'fuel' not in output:
-            if key:
-                output['fuel'] = {}
-            else:
-                output['fuel'] = []
-        if key:
-            if key not in output['fuel']:
-                output['fuel'][key] = []
-            output['fuel'][key].append(message)
-        else:
-            output['fuel'].append(message)
+        pass
+        # if 'fuel' not in output:
+        #     if key:
+        #         output['fuel'] = {}
+        #     else:
+        #         output['fuel'] = []
+        # if key:
+        #     if key not in output['fuel']:
+        #         output['fuel'][key] = []
+        #     output['fuel'][key].append(message)
+        # else:
+        #     output['fuel'].append(message)
     else:
         if node.cluster not in output:
             output[node.cluster] = {}
@@ -309,7 +310,7 @@ def verify_md5_builtin_show_results(conf, node, output=None):
     if not os.path.exists(node.mapscr[command]):
         return output_add(output, node,
                           'builtin md5 data output file missing!')
-    ex_filename = os.path.join(conf['customtest_db_dir'],
+    ex_filename = os.path.join(conf['cudet_db_dir'],
                                'md5/%s/%s.filter' % (node.release,
                                                      node.os_platform))
     # value-less dict
@@ -464,37 +465,30 @@ def main(argv=None):
     sys.stdout = Unbuffered(sys.stdout)
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--fake',
-                        help=("Do not perform remote commands, use already "
-                              "collected data"),
-                        action="store_true")
+                        help=('Do not perform remote commands, use already '
+                              'collected data'),
+                        action='store_true')
     parser.add_argument('-c', '--config',
-                        help=('Config file to use to override default '
-                              'configuration. Default: /usr/share/'
-                              'timmy-customtest/timmy-config-default.yaml '
-                              '(if present, else ./timmy-config.yaml)'),
-                        default=('/usr/share/timmy-customtest/'
-                                 'timmy-config-default.yaml'))
+                        help='Path to user config file',
+                        default=None)
     if argv is None:
         argv = sys.argv
     args = parser.parse_args(argv[1:])
-    if not os.path.isfile(args.config):
-        args.config = './timmy-config.yaml'
-    print('Initialization:')
-    sys.stdout.write('  Getting node list: ')
-    conf = configuration.load_conf(args.config)
-    nm = node_manager_init(conf)
-    print('DONE')
-    sys.stdout.write('  Loading necessary databases: ')
+    try:
+        conf = configuration.get_config(args.config)
+        nm = node_manager_init(conf)
+    except Exception as e:
+        print("[ERROR] Could't get node list.")
+        raise e
+
     versions_dict, output = load_versions_dict(conf, nm)
     if not versions_dict:
-        print('Aborting.')
+        print("[ERROR] Could't load databases.")
         return 1
-    if not output:
-        print('DONE')
-    else:
+    if output:
         pretty_print(output)
-    print('Data collection:')
-    sys.stdout.write('  Collecting data from %d nodes: ' % len(nm.nodes))
+
+    sys.stdout.write('Collecting data from %d nodes: ' % len(nm.nodes))
     nm.run_commands(conf['outdir'], fake=args.fake)
     print('DONE')
     print('Results:')
@@ -502,8 +496,6 @@ def main(argv=None):
             {'versions_dict': versions_dict}, 'OK')
     perform('  Built-in md5 verification analysis',
             verify_md5_builtin_show_results, nm, {'conf': conf}, 'OK')
-    perform('  MU safety analysis', mu_safety_check, nm,
-            {'versions_dict': versions_dict}, 'OK')
 
     # check updates state
     print('Updates availability status [ installed / available ]:')

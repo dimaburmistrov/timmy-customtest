@@ -1,4 +1,4 @@
-# timmy-customtest
+# cudet
 Python-based tool for Mirantis OpenStack, which provides the following info about environments and Fuel server:
 - custom package versions
 - post-install file changes (built-in md5 verification)
@@ -15,20 +15,17 @@ Python-based tool for Mirantis OpenStack, which provides the following info abou
   3. edit configuration file to specify Fuel's IP address instead of `127.0.0.1`
 
 # Installation and updates
-- always update [Timmy](https://github.com/adobdin/timmy) before updating timmy-customtest. To update Timmy if it is installed by pip, uninstall and reinstall: `pip uninstall timmy; pip install timmy`. If using git directly, do `git pull` in the folder where you cloned Timmy.
-- install timmy-customtest: `pip install git+https://github.com/f3flight/timmy-customtest`
-- alternatively, clone without installing: `git clone https://github.com/f3flight/timmy-customtest`
-- To update already installed timmy-customtest use pip to reinstall the package: `pip uninstall timmy-customtest; pip install timmy-customtest`. If using git directly, do `git pull` in the folder where you cloned Timmy-customtest.
+- install python-cudet: `pip install git+https://github.com/toha10/python-cudet`
+- To update already installed python-cudet use pip to reinstall the package: `pip uninstall pythn-cudet; pip install python-cudet`.
 
 # Usage
-- make sure you are ok to IO load your nodes (root partition), since the tool will do md5 verification of each installed package on each node (timmy-customtest uses `nice` and `ionice` to minimize the impact)
-- optionally copy and edit `/usr/share/timmy-customtest/timmy-config-default.yaml` - for example you can filter nodes by various parameters, then use `-c` option to specify your edited configuration file (if you have not installed via pip then simply edit `timmy-config.yaml`)
-- run the tool - `timmy-customtest`
-- if you cloned only, then cd into `timmy-customtest` folder and start the tool by running `./timmy-customtest`
-- optionally redirect output to a file: `timmy-customtest | tee results.yaml`
-- you can regenerate the report any time without actually collecting data from nodes again (connection to Fuel still needed to initialize the array of nodes) - to do this specify `-f` (`--fake`) option - this will use data previously collected in `/tmp/timmy/info` folder (unless you or Timmy have erased it)
+- make sure you are ok to IO load your nodes (root partition), since the tool will do md5 verification of each installed package on each node (cudet uses `nice` and `ionice` to minimize the impact)
+- optionally copy and edit `/usr/share/cudet/cudet-config.yaml` - for example you can filter nodes by various parameters, then use `-c` option to specify your edited configuration file.
+- run the tool - `cudet`
+- optionally redirect output to a file: `cudet | tee results.yaml`
+- you can regenerate the report any time without actually collecting data from nodes again (connection to Fuel still needed to initialize the array of nodes) - to do this specify `-f` (`--fake`) option - this will use data previously collected in `/tmp/cudet/info` folder (unless you or Cudet have erased it)
 - be happy
-- data (except stdout which you have to capture manually) is collected into `/tmp/timmy/info` if you decide to use/share it
+- data (except stdout which you have to capture manually) is collected into `/tmp/cudet/info` if you decide to use/share it
 
 # Reading the output
 Output is self-explanatory, you might want to view it with Vim and set up folding like so:

@@ -1,6 +1,6 @@
 recursive-include rq *
 recursive-include db *
 include README.md
-include timmy-config.yaml
-include timmy-config-default.yaml
+include cudet.yaml
+include cudet/default_config.yaml
 include rq.yaml
